@@ -1,0 +1,21 @@
+FROM ubuntu:22.04
+
+RUN apt update && \
+    apt install -y openssh-server && \
+    mkdir /var/run/sshd
+
+# Buat user
+RUN useradd -m -s /bin/bash renderuser && \
+    echo 'renderuser:renderpass' | chpasswd
+
+# SSH config
+RUN sed -i 's/#Port 22/Port 10000/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
+
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+EXPOSE 10000
+
+CMD ["/start.sh"]
